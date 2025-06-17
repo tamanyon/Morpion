@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Morpion vs IA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #fff;
+      border: 2px solid #333;
+      font-size: 2.5em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .cell:hover {
+      background: #e0e0e0;
+    }
+
+    #message {
+      margin: 15px;
+      font-size: 18px;
+      color: #555;
+    }
+
+    #restart {
+      padding: 10px 20px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    #restart:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤖 Tic-Tac-Toe contre l'IA</h1>
+  <div id="message">Ton tour (❌)</div>
+  <div id="board"></div>
+  <button id="restart">🔁 Rejouer</button>
+
+  <script>
+    const board = document.getElementById("board");
+    const message = document.getElementById("message");
+    const restartBtn = document.getElementById("restart");
+
+    let cells = [];
+    let gameActive = true;
+    let currentPlayer = "X";
+
+    const winningCombos = [
+      [0,1,2], [3,4,5], [6,7,8],
+      [0,3,6], [1,4,7], [2,5,8],
+      [0,4,8], [2,4,6]
+    ];
+
+    function createBoard() {
+      board.innerHTML = '';
+      cells = [];
+      gameActive = true;
+      currentPlayer = "X";
+      message.textContent = "Ton tour (❌)";
+
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = i;
+        cell.addEventListener("click", handlePlayerClick);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    function handlePlayerClick(e) {
+      if (!gameActive) return;
+      const cell = e.target;
+      const index = cell.dataset.index;
+
+      if (cell.textContent !== "") return;
+
+      cell.textContent = "X";
+      if (checkWin("X")) {
+        endGame("🎉 Tu as gagné !");
+        return;
+      }
+
+      if (isDraw()) {
+        endGame("🤝 Match nul !");
+        return;
+      }
+
+      message.textContent = "Tour de l'IA (⭕)";
+      setTimeout(() => iaPlay(), 500); // Petite pause pour rendre + naturel
+    }
+
+    function iaPlay() {
+      if (!gameActive) return;
+
+      let emptyCells = cells.filter(cell => cell.textContent === "");
+      if (emptyCells.length === 0) return;
+
+      // IA aléatoire : choisit une cellule vide au hasard
+      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      randomCell.textContent = "O";
+
+      if (checkWin("O")) {
+        endGame("💻 L'IA a gagné !");
+        return;
+      }
+
+      if (isDraw()) {
+        endGame("🤝 Match nul !");
+        return;
+      }
+
+      message.textContent = "Ton tour (❌)";
+    }
+
+    function checkWin(player) {
+      return winningCombos.some(combo => {
+        return combo.every(index => cells[index].textContent === player);
+      });
+    }
+
+    function isDraw() {
+      return cells.every(cell => cell.textContent !== "");
+    }
+
+    function endGame(text) {
+      message.textContent = text;
+      gameActive = false;
+    }
+
+    restartBtn.addEventListener("click", createBoard);
+    createBoard(); // Démarrage
+  </script>
+</body>
+</html>
